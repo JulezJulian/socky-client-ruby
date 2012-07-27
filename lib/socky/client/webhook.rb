@@ -7,7 +7,7 @@ module Socky
     	# Initializes a new Webook with a Rack::Request.
     	#
       def initialize(request)
-        @hash = request.env["data-hash"]
+        @hash = request.headers["data-hash"]
 
         request.body.rewind
         @body = request.body.read
