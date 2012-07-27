@@ -1,6 +1,10 @@
 # Mostly copied from pusher gem - they did great job and probably there are no reason to reinvent wheel ;)
 autoload 'Logger', 'logger'
-require File.expand_path(File.dirname(__FILE__)) + '/client/request'
+
+ROOT = File.expand_path(File.dirname(__FILE__))
+require "#{ROOT}/client/request"
+
+autoload :Webhook,     "#{ROOT}/client/webhook"
 
 module Socky
   class Client
@@ -17,10 +21,10 @@ module Socky
     class AuthenticationError < Error; end
     class ConfigurationError < Error; end
     class HTTPError < Error; attr_accessor :original_error; end
-    
+
     class << self
       attr_writer :logger
-      
+
       # @private
       def logger
         @logger ||= begin
@@ -30,10 +34,10 @@ module Socky
         end
       end
     end
-    
+
     attr_reader :uri, :secret
     attr_writer :logger
-    
+
     # Create Socky::Client instance for later use.
     # This is usually needed only once per application so it's good idea to put it in global variable
     #
@@ -47,7 +51,7 @@ module Socky
       @uri = URI.parse(uri)
       @secret = secret
     end
-    
+
     # Trigger event
     #
     # @example
@@ -68,20 +72,20 @@ module Socky
     def trigger!(event, opts = {})
       require 'net/http' unless defined?(Net::HTTP)
       require 'net/https' if (ssl? && !defined?(Net::HTTPS))
-      
+
       channel = opts[:channel] || opts['channel']
       data = opts[:data] || opts['data']
       raise ArgumentError, 'no channel provided' unless channel
-      
+
       request = Socky::Client::Request.new(self, event, channel, data)
-      
+
       @http_sync ||= begin
         http = Net::HTTP.new(@uri.host, @uri.port)
         http.use_ssl = true if ssl?
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE if ssl?
         http
       end
-      
+
       begin
         response = @http_sync.post(@uri.path,
           request.body, { 'Content-Type'=> 'application/json' })
@@ -93,10 +97,10 @@ module Socky
         error.original_error = e
         raise error
       end
-      
+
       return handle_response(response.code.to_i, response.body.chomp)
     end
-    
+
     # Trigger event, catching and logging any errors.
     #
     # @note CAUTION! No exceptions will be raised on failure
@@ -109,7 +113,7 @@ module Socky
       Socky::Client.logger.debug(e.backtrace.join("\n"))
       false
     end
-    
+
     # Trigger event asynchronously using EventMachine::HttpRequest
     #
     # @param (see #trigger!)
@@ -128,15 +132,15 @@ module Socky
         raise Error, "In order to use trigger_async you must be running inside an eventmachine loop"
       end
       require 'em-http' unless defined?(EventMachine::HttpRequest)
-      
+
       channel = opts[:channel] || opts['channel']
       data = opts[:data] || opts['data']
       raise ArgumentError, 'no channel provided' unless channel
-      
+
       request = Socky::Client::Request.new(self, event, channel, data)
-      
+
       deferrable = EM::DefaultDeferrable.new
-      
+
       http = EventMachine::HttpRequest.new(@uri).post({
         :timeout => 5, :body => request.body, :head => {'Content-Type'=> 'application/json'}
       })
@@ -152,12 +156,12 @@ module Socky
         Socky::Client.logger.debug("Network error connecting to socky server: #{http.inspect}")
         deferrable.fail(Error.new("Network error connecting to socky server"))
       }
-      
+
       deferrable
     end
-    
+
     private
-    
+
     def handle_response(status_code, body)
       case status_code
       when 202
@@ -172,7 +176,7 @@ module Socky
         raise Error, "Unknown error (status code #{status_code}): #{body}"
       end
     end
-    
+
     def ssl?
       @uri.scheme == 'https'
     end
