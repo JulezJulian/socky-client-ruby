@@ -4,7 +4,7 @@ autoload 'Logger', 'logger'
 ROOT = File.expand_path(File.dirname(__FILE__))
 require "#{ROOT}/client/request"
 
-autoload :Webhook,     "#{ROOT}/client/webhook"
+autoload :Webhook, "#{ROOT}/client/webhook"
 
 module Socky
   class Client
