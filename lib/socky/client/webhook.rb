@@ -26,8 +26,6 @@ module Socky
 		  digest = OpenSSL::Digest::SHA256.new
 		  received_data_hash = OpenSSL::HMAC.hexdigest(digest, 'my_secret', data_to_sign)
 
-		  puts 'calcd hash: ' + received_data_hash + ' rec: ' + received_data_hash
-
 		  return expected_hash.eql?(received_data_hash)
 		end
 
