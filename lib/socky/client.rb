@@ -4,10 +4,11 @@ autoload 'Logger', 'logger'
 ROOT = File.expand_path(File.dirname(__FILE__))
 require "#{ROOT}/client/request"
 
-autoload :Webhook, "#{ROOT}/client/webhook"
-
 module Socky
   class Client
+
+    autoload :Webhook, "#{ROOT}/client/webhook"
+
     # All Socky errors descend from this class so you can easily rescue Socky errors
     #
     # @example
