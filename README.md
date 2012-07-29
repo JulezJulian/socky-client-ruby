@@ -42,6 +42,7 @@ Webhook Requests can be validated and parsed by the Socky::Client::Webhook Class
 webhook = Socky::Client::Webhook.new(request, $socky_client)
 if webhook.valid?
 	# The received request is a valid and correctly signed webhook request. Handle the received events
+	puts webhook.data.inspect
 	render nothing: true, status: 200
 else
 	# do nothing
