@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 0.6.0 / 2012-23-11
+- Support for Webhooks introduced in socky-server 0.6.0 (see class Webhook)
+
 ## 0.5.0.beta1 / 2011-08-01
 
 Socky was rewritten from scratch. From this version it's Rack application and is based on
